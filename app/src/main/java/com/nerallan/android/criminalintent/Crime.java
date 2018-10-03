@@ -1,5 +1,6 @@
 package com.nerallan.android.criminalintent;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -10,10 +11,28 @@ public class Crime {
 
     private UUID mId;
     private String mTitle;
+    private Date mDate;
+    private boolean mSolved;        //whether the crime was solved
+
+    public Date getDate() {
+        return mDate;
+    }
+
+    public void setDate(Date date) {
+        mDate = date;
+    }
+
+    public boolean isSolved() {
+        return mSolved;
+    }
+
+    public void setSolved(boolean solved) {
+        mSolved = solved;
+    }
 
     public Crime(){
-        // generate random identifiers
-        mId = UUID.randomUUID();
+        mId = UUID.randomUUID();    // generate random identifiers
+        mDate = new Date();         // initialize mDate with current date
     }
 
     public UUID getId() {
