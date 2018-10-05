@@ -14,6 +14,11 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import static android.widget.CompoundButton.*;
 
 /**
@@ -61,7 +66,8 @@ public class CrimeFragment extends Fragment {
         });
 
         mDateButton = (Button)v.findViewById(R.id.crime_date);
-        mDateButton.setText(mCrime.getDate().toString());
+
+        mDateButton.setText(formatDate(mCrime.getDate()));
         // button is blocked
         mDateButton.setEnabled(false);
 
@@ -69,10 +75,16 @@ public class CrimeFragment extends Fragment {
         mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                // set flag of crime solution
                 mCrime.setSolved(isChecked);
             }
         });
         return v;
+    }
+
+    private String formatDate(Date pDate){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE, MMM d, y", Locale.getDefault());
+        return simpleDateFormat.format(pDate);
     }
 
 }
