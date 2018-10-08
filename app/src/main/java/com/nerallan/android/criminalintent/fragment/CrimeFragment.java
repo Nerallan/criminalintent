@@ -1,4 +1,4 @@
-package com.nerallan.android.criminalintent;
+package com.nerallan.android.criminalintent.fragment;
 
 
 import android.os.Bundle;
@@ -14,7 +14,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
-import java.text.DateFormat;
+import com.nerallan.android.criminalintent.R;
+import com.nerallan.android.criminalintent.model.Crime;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;

@@ -1,4 +1,4 @@
-package com.nerallan.android.criminalintent;
+package com.nerallan.android.criminalintent.model;
 
 import java.util.Date;
 import java.util.UUID;
