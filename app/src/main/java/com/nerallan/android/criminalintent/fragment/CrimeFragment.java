@@ -15,7 +15,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.nerallan.android.criminalintent.R;
-import com.nerallan.android.criminalintent.activity.CrimeActivity;
 import com.nerallan.android.criminalintent.model.Crime;
 import com.nerallan.android.criminalintent.model.CrimeLab;
 

@@ -15,7 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nerallan.android.criminalintent.R;
-import com.nerallan.android.criminalintent.activity.CrimeActivity;
+import com.nerallan.android.criminalintent.activity.CrimePagerActivity;
 import com.nerallan.android.criminalintent.model.Crime;
 import com.nerallan.android.criminalintent.model.CrimeLab;
 
@@ -99,7 +99,7 @@ public class CrimeListFragment extends Fragment{
         @Override
         public void onClick(View v) {
             mAdapterPosition = getAdapterPosition();
-            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
             startActivity(intent);
         }
     }
