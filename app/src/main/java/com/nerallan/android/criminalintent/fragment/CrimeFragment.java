@@ -30,20 +30,25 @@ import static android.widget.CompoundButton.*;
  * Created by Nerallan on 10/2/2018.
  */
 
+// A Bundle object can be attached to each fragment instance.
+// This object contains key-value pairs that work in the same way as intent extras in Activity.
+// Each such pair is called an argument.
+
 public class CrimeFragment extends Fragment {
 
-    private Crime mCrime;
+    private static final String ARG_CRIME_ID = "crime_id";
+
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckBox;
+    private Crime mCrime;
 
     // customize the fragment instance
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // get uuid from intent extra
-        UUID crimeId = (UUID) getActivity().getIntent()
-                .getSerializableExtra(CrimeActivity.EXTRA_CRIME_ID);
+        // get access to fragment arguments
+        UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
     }
 
@@ -90,6 +95,18 @@ public class CrimeFragment extends Fragment {
             }
         });
         return v;
+    }
+
+    // This method creates an instance of the fragment, packages it, and sets its arguments to the fragment
+    public static CrimeFragment newInstance(UUID pCrimeId){
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_CRIME_ID, pCrimeId);
+
+        CrimeFragment fragment = new CrimeFragment();
+        // To attach a packet of arguments to a fragment, call the Fragment method. setArguments (Bundle).
+        // The attachment must be done after creating the fragment, but before it is added to the activity
+        fragment.setArguments(args);
+        return fragment;
     }
 
     private String formatDate(Date pDate){
