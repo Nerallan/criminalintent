@@ -52,6 +52,7 @@ public class CrimeFragment extends Fragment {
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
     }
 
+
     // creating and customizing the fragment view
     // fill the layout of fragment view
     // the filled View object is returned to the host activity
@@ -96,6 +97,7 @@ public class CrimeFragment extends Fragment {
         });
         return v;
     }
+
 
     // This method creates an instance of the fragment, packages it, and sets its arguments to the fragment
     public static CrimeFragment newInstance(UUID pCrimeId){

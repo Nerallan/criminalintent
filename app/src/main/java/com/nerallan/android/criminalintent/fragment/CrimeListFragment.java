@@ -37,7 +37,7 @@ public class CrimeListFragment extends Fragment{
     private CrimeAdapter mAdapter;
 
     @Override
-    public View onCreateView(LayoutInflater pInflater, ViewGroup pContainer, Bundle pSavedInstanceState){
+    public View onCreateView(LayoutInflater pInflater, ViewGroup pContainer, Bundle pSavedInstanceState) {
         View view = pInflater.inflate(R.layout.fragment_crime_list, pContainer, false);
         mCrimeRecyclerView = (RecyclerView) view.findViewById(R.id.crime_recycler_view);
         // The LayoutManager object controls the positioning of elements and
@@ -47,13 +47,26 @@ public class CrimeListFragment extends Fragment{
         return view;
     }
 
+    // reload recycler view to sync updated model object with view element
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+
     // configure the user interface CrimeListFragment
     // binding adapter and RecyclerView
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        // if object CrimeAdapter not created yet
+        if (mAdapter == null){
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     // ViewHolder does only one thing: it holds the View object.
