@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 
 import com.nerallan.android.criminalintent.R;
@@ -30,13 +31,6 @@ public class CrimePagerActivity extends FragmentActivity{
     private List<Crime> mCrimes;
 
 
-    public static Intent newIntent(Context packageContext, UUID crimeId){
-        Intent intent = new Intent(packageContext, CrimePagerActivity.class);
-        intent.putExtra(EXTRA_CRIME_ID, crimeId);
-        return intent;
-    }
-
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +44,7 @@ public class CrimePagerActivity extends FragmentActivity{
         //  adapter FragmentStatePagerAdapter manages the interaction with ViewPager
         // In order for the adapter to do its work with the fragments returned in getItem (int),
         // it must be able to add them to the activity.
-        mViewPager.setAdapter(new FragmentPagerAdapter(fragmentManager) {
+        mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
                 Crime crime = mCrimes.get(position);
@@ -71,5 +65,11 @@ public class CrimePagerActivity extends FragmentActivity{
                 break;
             }
         }
+    }
+
+    public static Intent newIntent(Context packageContext, UUID crimeId){
+        Intent intent = new Intent(packageContext, CrimePagerActivity.class);
+        intent.putExtra(EXTRA_CRIME_ID, crimeId);
+        return intent;
     }
 }
