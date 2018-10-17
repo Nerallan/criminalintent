@@ -7,4 +7,5 @@
     <string name="crime_details_label">Details</string>
     <string name="crime_solved_label">Solved?</string>
     <string name="date_picker">Date of crime: </string>
+    <string name="time_picker">Time of crime: </string>
 </resources>
