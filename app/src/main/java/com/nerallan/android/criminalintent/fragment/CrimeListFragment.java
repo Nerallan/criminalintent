@@ -1,10 +1,12 @@
 package com.nerallan.android.criminalintent.fragment;
 
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -88,6 +90,9 @@ public class CrimeListFragment extends Fragment{
                 startActivity(intent);
                 // inform that further processing is not needed
                 return true;
+            case R.id.menu_item_show_subtitle:
+                updateSubtitle();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -105,6 +110,16 @@ public class CrimeListFragment extends Fragment{
         } else {
             mAdapter.notifyItemChanged(mAdapterPosition);
         }
+    }
+
+    // set the subtitle of the toolbar with the number of crimes in CriminalIntent
+    private void updateSubtitle(){
+        CrimeLab crimeLab = CrimeLab.get(getActivity());
+        int crimeCount = crimeLab.getCrimes().size();
+        String subtitle = getString(R.string.subtitle_format, crimeCount);
+        // the host activity for the CrimeListFragment is converted to AppCompatActivity
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setSubtitle(subtitle);
     }
 
     // ViewHolder does only one thing: it holds the View object.

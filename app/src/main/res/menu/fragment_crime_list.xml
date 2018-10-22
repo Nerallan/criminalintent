@@ -8,4 +8,9 @@
         app:showAsAction="ifRoom|withText"/>
     <!-- the menu command should be displayed on the toolbar itself or in the additional(overflow) menu -->
 
+    <!--menu command that hide and display the subtitle in the toolbar -->
+    <item
+        android:id="@+id/menu_item_show_subtitle"
+        android:title="@string/show_subtitle"
+        app:showAsAction="ifRoom"/>
 </menu>
