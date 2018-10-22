@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,9 @@ public class CrimeListFragment extends Fragment{
 
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
+    //private TextView mEmptyView;
+    private View mLinearLayout;
+    private Button mAddCrimeButton;
     private int mAdapterPosition;
     private boolean mSubtitleVisible;
 
@@ -52,6 +56,20 @@ public class CrimeListFragment extends Fragment{
         // The LayoutManager object controls the positioning of elements and
         // determines the scrolling behavior.
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mLinearLayout = view.findViewById(R.id.add_crime_view);
+        mAddCrimeButton = view.findViewById(R.id.add_crime_button);
+        mAddCrimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Crime crime = new Crime();
+                CrimeLab.get(getActivity()).addCrime(crime);
+                Intent intent = CrimePagerActivity.newIntent(getActivity(),crime.getId());
+                startActivity(intent); //starting an instance of CrimePageActivity to edit new Crime
+            }
+        });
+
+
         if (pSavedInstanceState != null){
             mSubtitleVisible = pSavedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
         }
@@ -125,8 +143,14 @@ public class CrimeListFragment extends Fragment{
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
         } else {
+            // We are updating only one item at a time so using notifyDataSetChanged would be insufficient as it updates all the items
+            // so use notifyItemChanged to update only that item which has changed
+            // crimeAdapter.notifyDataSetChanged();
             mAdapter.notifyItemChanged(mAdapterPosition);
         }
+
+        // used to display button and text view if the recycler view is empty
+        mLinearLayout.setVisibility(crimes.size() > 0 ? View.GONE : View.VISIBLE);
         // when creating a new crime and then returning to CrimeListActivity with the Back button,
         // update the contents of the subtitle to match the new number of crimes.
         updateSubtitle();
