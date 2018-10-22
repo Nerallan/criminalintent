@@ -63,9 +63,9 @@ public class TimePickerFragment extends DialogFragment {
                 .create();
     }
 
-    public static TimePickerFragment newInstance(Date pDate){
+    public static TimePickerFragment newInstance(Date pTime){
         Bundle args = new Bundle();
-        args.putSerializable(ARG_TIME, pDate);
+        args.putSerializable(ARG_TIME, pTime);
 
         TimePickerFragment fragment = new TimePickerFragment();
         fragment.setArguments(args);

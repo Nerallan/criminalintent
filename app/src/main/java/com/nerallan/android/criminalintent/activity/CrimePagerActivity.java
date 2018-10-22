@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 
 import com.nerallan.android.criminalintent.R;
 import com.nerallan.android.criminalintent.fragment.CrimeFragment;
@@ -23,7 +24,8 @@ import java.util.UUID;
  * Created by Nerallan on 10/12/2018.
  */
 
-public class CrimePagerActivity extends FragmentActivity{
+// class AppCompatActivity is a subclass of FragmentActivity
+public class CrimePagerActivity extends AppCompatActivity {
 
     private static final String EXTRA_CRIME_ID = "com.nerallan.android.criminalintent.crime_id";
 

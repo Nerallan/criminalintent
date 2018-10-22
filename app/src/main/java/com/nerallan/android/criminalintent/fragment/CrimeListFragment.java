@@ -8,6 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -48,6 +51,16 @@ public class CrimeListFragment extends Fragment{
         return view;
     }
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        // we must explicitly tell to FragmentManager that the fragment should receive an onCreateOptionsMenu (...) call.
+        // report it to FragmentManager
+        setHasOptionsMenu(true);
+    }
+
+
     // reload recycler view to sync updated model object with view element
     @Override
     public void onResume() {
@@ -55,6 +68,30 @@ public class CrimeListFragment extends Fragment{
         updateUI();
     }
 
+    // FragmentManager is responsible for calling Fragment.onCreateOptionsMenu (Menu, MenuInflater)
+    // when activity receives an onCreateOptionsMenu callback from the OS.
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime_list, menu);
+    }
+
+    // the user selects the command in the command menu, the fragment receives the callback of the method
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_item_new_crime:
+                Crime crime = new Crime();
+                CrimeLab.get(getActivity()).addCrime(crime);
+                // launch CrimePagerActivity from intent
+                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
+                startActivity(intent);
+                // inform that further processing is not needed
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     // configure the user interface CrimeListFragment
     // binding adapter and RecyclerView

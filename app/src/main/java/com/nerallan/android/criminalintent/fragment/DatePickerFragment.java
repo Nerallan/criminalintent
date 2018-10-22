@@ -32,33 +32,54 @@ public class DatePickerFragment extends DialogFragment {
     public static final String EXTRA_DATE = "com.nerallan.android.criminalintent.date";
 
     // FragmentManager instance of host-activity calls this method during DialogFragment output to the screen
+//    @NonNull
+//    @Override
+//    public Dialog onCreateDialog(Bundle savedInstanceState) {
+//        // get date from DatePickerFragment args package
+//        Date date = (Date) getArguments().getSerializable(ARG_DATE);
+//
+//        // to initialize the datepicker, you must have integer values for month, day, and year.
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(date);
+//        int year = calendar.get(Calendar.YEAR);
+//        int month = calendar.get(Calendar.MONTH);
+//        int day = calendar.get(Calendar.DAY_OF_MONTH);
+//
+//        // filling view dialog date picker
+//        View view = LayoutInflater.from(getActivity())
+//                .inflate(R.layout.dialog_date, null);
+//
+//        mDatePicker = (DatePicker) view.findViewById(R.id.dialog_date_picker);
+//        mDatePicker.init(year, month, day, null);
+//
+//        return new AlertDialog.Builder(getActivity())
+//                // dialog box settings
+//                .setView(view)
+//                .setTitle(R.string.date_picker)
+//                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        // the application should get the date from the datepicker and
+//                        // send the result to the CrimeFragment ( calls sendResult() )
+//                        int year = mDatePicker.getYear();
+//                        int month = mDatePicker.getMonth();
+//                        int day = mDatePicker.getDayOfMonth();
+//                        Date date = new GregorianCalendar(year, month, day).getTime();
+//                        sendResult(Activity.RESULT_OK, date);
+//                    }
+//                })
+//                .create();
+//    }
+
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // get date from DatePickerFragment args package
-        Date date = (Date) getArguments().getSerializable(ARG_DATE);
-
-        // to initialize the datepicker, you must have integer values for month, day, and year.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        // filling view dialog date picker
-        View view = LayoutInflater.from(getActivity())
-                .inflate(R.layout.dialog_date, null);
-
-        mDatePicker = (DatePicker) view.findViewById(R.id.dialog_date_picker);
-        mDatePicker.init(year, month, day, null);
-
-        return new AlertDialog.Builder(getActivity())
-                // dialog box settings
-                .setView(view)
-                .setTitle(R.string.date_picker)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(R.string.date_picker)
+                    .setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
                         // the application should get the date from the datepicker and
                         // send the result to the CrimeFragment ( calls sendResult() )
                         int year = mDatePicker.getYear();
@@ -66,9 +87,11 @@ public class DatePickerFragment extends DialogFragment {
                         int day = mDatePicker.getDayOfMonth();
                         Date date = new GregorianCalendar(year, month, day).getTime();
                         sendResult(Activity.RESULT_OK, date);
-                    }
-                })
-                .create();
+                        }
+                    });
+
+            // Create the AlertDialog object and return it
+            return builder.create();
     }
 
 
