@@ -38,6 +38,8 @@ import java.util.List;
 // When a RecyclerView widget needs a view object to display, it enters into a dialogue with its adapter.
 public class CrimeListFragment extends Fragment{
 
+    private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
+
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
     private int mAdapterPosition;
@@ -50,6 +52,9 @@ public class CrimeListFragment extends Fragment{
         // The LayoutManager object controls the positioning of elements and
         // determines the scrolling behavior.
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        if (pSavedInstanceState != null){
+            mSubtitleVisible = pSavedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
+        }
         updateUI();
         return view;
     }
@@ -122,6 +127,9 @@ public class CrimeListFragment extends Fragment{
         } else {
             mAdapter.notifyItemChanged(mAdapterPosition);
         }
+        // when creating a new crime and then returning to CrimeListActivity with the Back button,
+        // update the contents of the subtitle to match the new number of crimes.
+        updateSubtitle();
     }
 
     // set the subtitle of the toolbar with the number of crimes in CriminalIntent
@@ -137,6 +145,12 @@ public class CrimeListFragment extends Fragment{
         // the host activity for the CrimeListFragment is converted to AppCompatActivity
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.getSupportActionBar().setSubtitle(subtitle);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
     }
 
     // ViewHolder does only one thing: it holds the View object.
