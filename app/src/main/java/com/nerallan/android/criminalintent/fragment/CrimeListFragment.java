@@ -135,8 +135,9 @@ public class CrimeListFragment extends Fragment{
     // set the subtitle of the toolbar with the number of crimes in CriminalIntent
     private void updateSubtitle(){
         CrimeLab crimeLab = CrimeLab.get(getActivity());
-        int crimeCount = crimeLab.getCrimes().size();
-        String subtitle = getString(R.string.subtitle_format, crimeCount);
+        int crimeSize = crimeLab.getCrimes().size();
+        // selecting correct string depending on the number of crimes
+        String subtitle = getResources().getQuantityString(R.plurals.subtitle_plural, crimeSize, crimeSize);
         // if subtitle is showed
         // make it hidden
         if (!mSubtitleVisible){
