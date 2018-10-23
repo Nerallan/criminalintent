@@ -14,6 +14,7 @@ public class Crime {
     private Date mDate;
     private boolean mSolved;        //whether the crime was solved
 
+
     public Crime(){
         mId = UUID.randomUUID();    // generate random identifiers
         mDate = new Date();         // initialize mDate with current date

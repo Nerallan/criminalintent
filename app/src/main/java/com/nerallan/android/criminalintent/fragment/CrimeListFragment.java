@@ -43,7 +43,6 @@ public class CrimeListFragment extends Fragment{
 
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
-    //private TextView mEmptyView;
     private View mLinearLayout;
     private Button mAddCrimeButton;
     private int mAdapterPosition;
@@ -68,7 +67,6 @@ public class CrimeListFragment extends Fragment{
                 startActivity(intent); //starting an instance of CrimePageActivity to edit new Crime
             }
         });
-
 
         if (pSavedInstanceState != null){
             mSubtitleVisible = pSavedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
@@ -133,6 +131,13 @@ public class CrimeListFragment extends Fragment{
         }
     }
 
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
+    }
+
     // configure the user interface CrimeListFragment
     // binding adapter and RecyclerView
     private void updateUI() {
@@ -172,11 +177,6 @@ public class CrimeListFragment extends Fragment{
         activity.getSupportActionBar().setSubtitle(subtitle);
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
-    }
 
     // ViewHolder does only one thing: it holds the View object.
     // itemView stores a reference to all representation View, transferred to super (view).
@@ -184,6 +184,7 @@ public class CrimeListFragment extends Fragment{
 
         private TextView mTitleTextView;
         private TextView mDateTextView;
+        private TextView mDeleteItemTextView;
         private CheckBox mSolvedCheckBox;
         private Crime mCrime;
 
@@ -194,7 +195,17 @@ public class CrimeListFragment extends Fragment{
             mTitleTextView = itemView.findViewById(R.id.list_item_crime_title_text_view);
             mDateTextView = itemView.findViewById(R.id.list_item_crime_date_text_view_);
             mSolvedCheckBox = itemView.findViewById(R.id.list_item_solved_check_box);
+            mDeleteItemTextView = itemView.findViewById(R.id.delete_crime_text_view);
+
+            mDeleteItemTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mAdapter.deleteItem(getAdapterPosition());
+                }
+            });
         }
+
+
 
         // filling view items by model object
         public void bindCrime(Crime pCrime){
@@ -202,6 +213,7 @@ public class CrimeListFragment extends Fragment{
             mTitleTextView.setText(mCrime.getTitle());
             mDateTextView.setText(mCrime.getDate().toString());
             mSolvedCheckBox.setChecked(mCrime.isSolved());
+            mDeleteItemTextView.setText(R.string.delete_item);
         }
 
         @Override
@@ -211,6 +223,8 @@ public class CrimeListFragment extends Fragment{
             startActivity(intent);
         }
     }
+
+
 
     // adapter - to the controller object that is between the RecyclerView and the dataset with
     // the information that RecyclerView should display
@@ -246,6 +260,12 @@ public class CrimeListFragment extends Fragment{
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        public void deleteItem(int pAdapterPosition) {
+            mCrimes.remove(pAdapterPosition);
+            // to update all list after removing cetraing item
+            notifyDataSetChanged();
         }
     }
 }
