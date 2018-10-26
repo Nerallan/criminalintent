@@ -51,6 +51,7 @@ public class CrimeLab {
 
 
     public List<Crime> getCrimes() {
+        // snapshot of crime objects at particular moment of time
         List<Crime> crimes = new ArrayList<>();
 
         CrimeCursorWrapper cursorWrapper = queryCrimes(null, null);
@@ -66,6 +67,7 @@ public class CrimeLab {
         }
         return crimes;
     }
+
 
     // method extracts only the first element
     public Crime getCrime(UUID pId){

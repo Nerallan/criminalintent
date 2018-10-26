@@ -28,6 +28,7 @@ public class TimePickerFragment extends DialogFragment {
 
     public static final String EXTRA_TIME = "com.nerallan.android.criminalintent.time";
 
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class TimePickerFragment extends DialogFragment {
                 })
                 .create();
     }
+
 
     public static TimePickerFragment newInstance(Date pTime){
         Bundle args = new Bundle();

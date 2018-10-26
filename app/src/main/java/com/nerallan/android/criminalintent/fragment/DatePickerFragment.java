@@ -31,6 +31,7 @@ public class DatePickerFragment extends DialogFragment {
 
     public static final String EXTRA_DATE = "com.nerallan.android.criminalintent.date";
 
+
     // FragmentManager instance of host-activity calls this method during DialogFragment output to the screen
     @NonNull
     @Override

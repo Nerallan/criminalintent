@@ -48,6 +48,7 @@ public class CrimeListFragment extends Fragment{
     private int mAdapterPosition;
     private boolean mSubtitleVisible;
 
+
     @Override
     public View onCreateView(LayoutInflater pInflater, ViewGroup pContainer, Bundle pSavedInstanceState) {
         View view = pInflater.inflate(R.layout.fragment_crime_list, pContainer, false);
@@ -92,6 +93,7 @@ public class CrimeListFragment extends Fragment{
         updateUI();
     }
 
+
     // FragmentManager is responsible for calling Fragment.onCreateOptionsMenu (Menu, MenuInflater)
     // when activity receives an onCreateOptionsMenu callback from the OS.
     @Override
@@ -108,6 +110,7 @@ public class CrimeListFragment extends Fragment{
             subtitleItem.setTitle(R.string.show_subtitle);
         }
     }
+
 
     // the user selects the command in the command menu, the fragment receives the callback of the method
     @Override
@@ -148,6 +151,7 @@ public class CrimeListFragment extends Fragment{
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
         } else {
+            mAdapter.setCrimes(crimes);
             // We are updating only one item at a time so using notifyDataSetChanged would be insufficient as it updates all the items
             // so use notifyItemChanged to update only that item which has changed
             // crimeAdapter.notifyDataSetChanged();
@@ -160,6 +164,7 @@ public class CrimeListFragment extends Fragment{
         // update the contents of the subtitle to match the new number of crimes.
         updateSubtitle();
     }
+
 
     // set the subtitle of the toolbar with the number of crimes in CriminalIntent
     private void updateSubtitle(){
@@ -206,7 +211,6 @@ public class CrimeListFragment extends Fragment{
         }
 
 
-
         // filling view items by model object
         public void bindCrime(Crime pCrime){
             mCrime = pCrime;
@@ -215,6 +219,7 @@ public class CrimeListFragment extends Fragment{
             mSolvedCheckBox.setChecked(mCrime.isSolved());
             mDeleteItemTextView.setText(R.string.delete_item);
         }
+
 
         @Override
         public void onClick(View v) {
@@ -250,6 +255,7 @@ public class CrimeListFragment extends Fragment{
             return new CrimeHolder(view);
         }
 
+
         // this method associates the View of the ViewHolder object with a model object by position
         @Override
         public void onBindViewHolder(@NonNull CrimeHolder holder, int position) {
@@ -257,12 +263,19 @@ public class CrimeListFragment extends Fragment{
             holder.bindCrime(crime);
         }
 
+
         @Override
         public int getItemCount() {
             return mCrimes.size();
         }
 
-        public void deleteItem(int pAdapterPosition) {
+
+        public void setCrimes(List<Crime> pCrimes){
+            mCrimes = pCrimes;
+        }
+
+
+        private void deleteItem(int pAdapterPosition) {
             mCrimes.remove(pAdapterPosition);
             // to update all list after removing cetraing item
             notifyDataSetChanged();
