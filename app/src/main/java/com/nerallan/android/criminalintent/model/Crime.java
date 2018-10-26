@@ -16,9 +16,14 @@ public class Crime {
 
 
     public Crime(){
-        mId = UUID.randomUUID();    // generate random identifiers
+        this(UUID.randomUUID());
+    }
+
+    public Crime(UUID pId){
+        mId = pId;
         mDate = new Date();         // initialize mDate with current date
     }
+
 
     public Date getDate() {
         return mDate;
