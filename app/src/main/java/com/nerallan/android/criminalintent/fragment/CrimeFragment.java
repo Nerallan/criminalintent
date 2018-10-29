@@ -10,6 +10,7 @@ import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -97,15 +98,23 @@ public class CrimeFragment extends Fragment {
         mReportButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // create implicit intent
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                // report text and subject line are included in extras
-                intent.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
-                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
-                // create a list that will be displayed each time when using an implicit intent to start the activity
-                intent = Intent.createChooser(intent, getString(R.string.send_report));
-                startActivity(intent);
+                  // create implicit intent
+//                Intent intent = new Intent(Intent.ACTION_SEND);
+//                intent.setType("text/plain");
+//                // report text and subject line are included in extras
+//                intent.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+//                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+//                // create a list that will be displayed each time when using an implicit intent to start the activity
+//                intent = Intent.createChooser(intent, getString(R.string.send_report));
+//                startActivity(intent);
+
+                String mimeType = "text/plain";
+                Intent shareIntent = ShareCompat.IntentBuilder.from(getActivity())
+                        .setChooserTitle(R.string.send_report)
+                        .setText(getCrimeReport())
+                        .setType(mimeType)
+                        .getIntent();
+                startActivity(shareIntent);
             }
         });
 
