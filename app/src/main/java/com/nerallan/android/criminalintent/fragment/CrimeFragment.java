@@ -2,7 +2,11 @@ package com.nerallan.android.criminalintent.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,6 +24,7 @@ import com.nerallan.android.criminalintent.R;
 import com.nerallan.android.criminalintent.model.Crime;
 import com.nerallan.android.criminalintent.model.CrimeLab;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -41,10 +46,13 @@ public class CrimeFragment extends Fragment {
     private static final String DIALOG_TIME = "DialogTime";
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
+    private static final int REQUEST_CONTACT = 2;
 
     private EditText mTitleField;
     private Button mDateButton;
     private Button mTimeButton;
+    private Button mReportButton;
+    private Button mSuspectButton;
     private CheckBox mSolvedCheckBox;
     private Crime mCrime;
 
@@ -82,6 +90,22 @@ public class CrimeFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
 
+            }
+        });
+
+        mReportButton = (Button) v.findViewById(R.id.crime_report);
+        mReportButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // create implicit intent
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                // report text and subject line are included in extras
+                intent.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+                // create a list that will be displayed each time when using an implicit intent to start the activity
+                intent = Intent.createChooser(intent, getString(R.string.send_report));
+                startActivity(intent);
             }
         });
 
@@ -123,6 +147,32 @@ public class CrimeFragment extends Fragment {
                 mCrime.setSolved(isChecked);
             }
         });
+
+        // create implicit intent for your Contacts book
+        final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        mSuspectButton = (Button) v.findViewById(R.id.crime_suspect);
+        mSuspectButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(pickContact, REQUEST_CONTACT);
+            }
+        });
+
+        if (mCrime.getSuspect() != null){
+            // set title for suspect button
+            mSuspectButton.setText(mCrime.getSuspect());
+        }
+
+        // packageManager knows all about the components installed on an Android device, including all its activities
+        PackageManager packageManager = getActivity().getPackageManager();
+        // calling resolveActivity (Intent, int), you order to find the activity corresponding to the transferred intent.
+        // The MATCH_DEFAULT_ONLY flag limits search to activities with the CATEGORY_ DEFAULT flag
+        // If the search is successful, a ResolveInfo instance is returned,
+        // which reports full information about the found activity.
+        if(packageManager.resolveActivity(pickContact, packageManager.MATCH_DEFAULT_ONLY) == null){
+            mSuspectButton.setEnabled(false);
+        }
+
         return v;
     }
 
@@ -141,14 +191,58 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
             updateDate();
-        }
-        if (requestCode == REQUEST_TIME){
+        } else if (requestCode == REQUEST_TIME){
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setDate(date);
             updateTime();
+        } else if (requestCode == REQUEST_CONTACT && data != null){
+            Uri contactUri = data.getData();
+            // defining fields whose values should be returned by the query
+            String[] queryFields = new String[]{
+                    ContactsContract.Contacts.DISPLAY_NAME
+            };
+            // ContentProvider class instances encapsulate databases and provide access to them for other applications.
+            // accessing the ContentProvider is through the ContentResolver.
+            // requests all the display names of the contacts from the returned data
+            Cursor cursor = getActivity().getContentResolver()
+                    // execution of the request, contactUri performs the function of the conditions 'where'
+                    .query(contactUri, queryFields, null, null, null);
+            try{
+                // validation of results
+                if(cursor.getCount() == 0){
+                    return;
+                }
+                cursor.moveToFirst();
+                // fetching the first column of data - the name of the suspect
+                String suspect = cursor.getString(0);
+                mCrime.setSuspect(suspect);
+                mSuspectButton.setText(suspect);
+            } finally {
+                cursor.close();
+            }
         }
     }
 
+    private String getCrimeReport(){
+        String solvedString = null;
+        if (mCrime.isSolved()){
+            solvedString = getString(R.string.crime_report_solved);
+        } else {
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+
+        String dateFormat = "EEE, MMM, dd";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.getDefault());
+        String dateString = simpleDateFormat.format(mCrime.getDate());
+        String suspect = mCrime.getSuspect();
+        if (suspect == null){
+            suspect = getString(R.string.crime_report_no_suspect);
+        } else {
+            suspect = getString(R.string.crime_report_suspect, suspect);
+        }
+        String report = getString(R.string.crime_report, mCrime.getTitle(), dateString, solvedString, suspect);
+        return report;
+    }
 
     // This method creates an instance of the fragment, packages it, and sets its arguments to the fragment
     // to fragment was not tied to a specific host activity

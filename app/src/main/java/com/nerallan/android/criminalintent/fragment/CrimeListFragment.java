@@ -1,7 +1,6 @@
 package com.nerallan.android.criminalintent.fragment;
 
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,16 +17,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nerallan.android.criminalintent.R;
 import com.nerallan.android.criminalintent.activity.CrimePagerActivity;
 import com.nerallan.android.criminalintent.model.Crime;
 import com.nerallan.android.criminalintent.model.CrimeLab;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Nerallan on 10/8/2018.
@@ -205,7 +202,9 @@ public class CrimeListFragment extends Fragment{
             mDeleteItemTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
                     mAdapter.deleteItem(getAdapterPosition());
+//                    CrimeLab.get(getActivity()).deleteCrime(getAdapterPosition());
                 }
             });
         }
@@ -276,9 +275,11 @@ public class CrimeListFragment extends Fragment{
 
 
         private void deleteItem(int pAdapterPosition) {
+            CrimeLab.get(getActivity()).deleteCrime(pAdapterPosition);
             mCrimes.remove(pAdapterPosition);
             // to update all list after removing cetraing item
             notifyDataSetChanged();
         }
+
     }
 }

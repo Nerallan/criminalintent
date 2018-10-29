@@ -16,6 +16,8 @@ import database.CrimeCursorWrapper;
 import database.CrimeDbSchema;
 import database.CrimeDbSchema.CrimeTable;
 
+import static android.os.Build.ID;
+
 /**
  * Created by Nerallan on 10/6/2018.
  */
@@ -114,9 +116,14 @@ public class CrimeLab {
         ContentValues values = getContentValues(pCrime);
 
         // ContentValues object should be assigned to each updating record
-        //
         mDatabase.update(CrimeTable.NAME, values, CrimeTable.Cols.UUID + " = ?",
                 new String[] {uuidString});
+    }
+
+    public boolean deleteCrime(Integer pId){
+        mDatabase = new CrimeBaseHelper(mContext).getWritableDatabase();
+        mDatabase.delete(CrimeTable.NAME, "_id=?", new String[] {pId.toString()});
+        return  true;
     }
 
 
@@ -128,6 +135,7 @@ public class CrimeLab {
         values.put(CrimeTable.Cols.TITLE, pCrime.getTitle());
         values.put(CrimeTable.Cols.DATE, pCrime.getDate().getTime());
         values.put(CrimeTable.Cols.SOLVED, pCrime.isSolved() ? 1 : 0);
+        values.put(CrimeTable.Cols.SUSPECT, pCrime.getSuspect());
         return values;
     }
 }
