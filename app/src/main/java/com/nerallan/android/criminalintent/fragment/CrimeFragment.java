@@ -1,13 +1,20 @@
 package com.nerallan.android.criminalintent.fragment;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
@@ -20,6 +27,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.nerallan.android.criminalintent.R;
 import com.nerallan.android.criminalintent.model.Crime;
@@ -48,12 +56,14 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
     private static final int REQUEST_CONTACT = 2;
+    private static final int REQUEST_PHONE_CALL = 100;
 
     private EditText mTitleField;
     private Button mDateButton;
     private Button mTimeButton;
     private Button mReportButton;
     private Button mSuspectButton;
+    private Button mCallButton;
     private CheckBox mSolvedCheckBox;
     private Crime mCrime;
 
@@ -163,7 +173,16 @@ public class CrimeFragment extends Fragment {
         mSuspectButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(pickContact, REQUEST_CONTACT);
+                openContactBook();
+//                startActivityForResult(pickContact, REQUEST_CONTACT);
+            }
+        });
+
+        mCallButton = (Button) v.findViewById(R.id.crime_suspect_call);
+        mCallButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialPhoneNumber(mCrime.getSuspectNumber());
             }
         });
 
@@ -185,6 +204,7 @@ public class CrimeFragment extends Fragment {
         return v;
     }
 
+
     @Override
     public void onPause() {
         super.onPause();
@@ -205,9 +225,11 @@ public class CrimeFragment extends Fragment {
             mCrime.setDate(date);
             updateTime();
         } else if (requestCode == REQUEST_CONTACT && data != null){
+            String contactLookupKey;
             Uri contactUri = data.getData();
             // defining fields whose values should be returned by the query
             String[] queryFields = new String[]{
+                    ContactsContract.Contacts.LOOKUP_KEY,
                     ContactsContract.Contacts.DISPLAY_NAME
             };
             // ContentProvider class instances encapsulate databases and provide access to them for other applications.
@@ -216,21 +238,124 @@ public class CrimeFragment extends Fragment {
             Cursor cursor = getActivity().getContentResolver()
                     // execution of the request, contactUri performs the function of the conditions 'where'
                     .query(contactUri, queryFields, null, null, null);
-            try{
+
+
+            try {
                 // validation of results
                 if(cursor.getCount() == 0){
                     return;
                 }
                 cursor.moveToFirst();
                 // fetching the first column of data - the name of the suspect
-                String suspect = cursor.getString(0);
+                int lookupColumn = cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY);
+                int nameColumn = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+
+                contactLookupKey = cursor.getString(lookupColumn);
+                String suspect = cursor.getString(nameColumn);
+
                 mCrime.setSuspect(suspect);
                 mSuspectButton.setText(suspect);
             } finally {
                 cursor.close();
             }
+
+            contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+            // find phone number
+            queryFields = new String[]{
+                    Phone.NUMBER
+            };
+            cursor = getActivity().getContentResolver()
+                    .query(contactUri,
+                            queryFields,
+                            ContactsContract.Contacts.LOOKUP_KEY + " = ?" ,
+                            new String[] {contactLookupKey},
+                            null
+                    );
+
+            try {
+                if(cursor.getCount() == 0){
+                    return;
+                }
+                // pull out the data of the first row that is phone number
+                cursor.moveToFirst();
+                String number = cursor.getString(0);
+
+                mCallButton.setEnabled(true);
+                mCrime.setSuspectNumber(number);
+            } finally {
+                cursor.close();
+            }
         }
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == REQUEST_PHONE_CALL){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                callPhoneNumber();
+            }
+            else{
+                Toast.makeText(getActivity(), getResources().getString(R.string.permission_denied), Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_CONTACT){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openContactBook();
+            }
+            else{
+                Toast.makeText(getActivity(), getResources().getString(R.string.permission_denied), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // check user permissions to open contacts
+    private void openContactBook(){
+        try{
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACT);
+                    return;
+                }
+            }
+            // create implicit intent for your Contacts book
+            final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+            startActivityForResult(pickContact, REQUEST_CONTACT);
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+    }
+
+
+    // check user permissions for calling
+    private void callPhoneNumber() {
+        try {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
+                    return;
+                }
+            }
+            dialPhoneNumber(mCrime.getSuspectNumber());
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+    }
+
+
+    // make implicit intent with suspect phone number
+    public void dialPhoneNumber(String pPhoneNumber){
+        Intent callSuspect = new Intent(Intent.ACTION_DIAL);
+        callSuspect.setData(Uri.parse("tel:" + pPhoneNumber));
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (callSuspect.resolveActivity(packageManager) != null){
+            startActivityForResult(callSuspect, REQUEST_CONTACT);
+        }
+    }
+
 
     private String getCrimeReport(){
         String solvedString = null;
@@ -239,7 +364,6 @@ public class CrimeFragment extends Fragment {
         } else {
             solvedString = getString(R.string.crime_report_unsolved);
         }
-
         String dateFormat = "EEE, MMM, dd";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.getDefault());
         String dateString = simpleDateFormat.format(mCrime.getDate());
@@ -252,6 +376,8 @@ public class CrimeFragment extends Fragment {
         String report = getString(R.string.crime_report, mCrime.getTitle(), dateString, solvedString, suspect);
         return report;
     }
+
+
 
     // This method creates an instance of the fragment, packages it, and sets its arguments to the fragment
     // to fragment was not tied to a specific host activity
