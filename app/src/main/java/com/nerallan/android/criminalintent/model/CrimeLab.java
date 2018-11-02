@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -137,6 +139,19 @@ public class CrimeLab {
         values.put(CrimeTable.Cols.SOLVED, pCrime.isSolved() ? 1 : 0);
         values.put(CrimeTable.Cols.SUSPECT, pCrime.getSuspect());
         return values;
+    }
+
+
+    // returns the path to the external storage where the photo is stored
+    public File getPhotoFile(Crime pCrime){
+        // returns a folder handle in the primary external storage
+        // when passing a String type, you will be able to access the folder intended for a specific content type.
+        // type constants are defined in the Environment with the prefix DIRECTORY_.
+        File externalFilesDir = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (externalFilesDir == null){
+            return null;
+        }
+        return new File(externalFilesDir, pCrime.getPhotoFileName());
     }
 }
 

@@ -6,12 +6,14 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -27,12 +29,15 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.nerallan.android.criminalintent.R;
 import com.nerallan.android.criminalintent.model.Crime;
 import com.nerallan.android.criminalintent.model.CrimeLab;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,7 +61,8 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
     private static final int REQUEST_CONTACT = 2;
-    private static final int REQUEST_PHONE_CALL = 100;
+    private static final int REQUEST_PHONE_CALL = 3;
+    private static final int REQUEST_PHOTO = 4;
 
     private EditText mTitleField;
     private Button mDateButton;
@@ -65,7 +71,10 @@ public class CrimeFragment extends Fragment {
     private Button mSuspectButton;
     private Button mCallButton;
     private CheckBox mSolvedCheckBox;
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
     private Crime mCrime;
+    private File mPhotoFile;
 
     // customize the fragment instance
     @Override
@@ -74,6 +83,7 @@ public class CrimeFragment extends Fragment {
         // get access to fragment arguments
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
     }
 
 
@@ -101,6 +111,30 @@ public class CrimeFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
 
+            }
+        });
+
+        mPhotoButton = (ImageButton) v.findViewById(R.id.crime_camera);
+        mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
+
+        // MediaStore class defines the open interfaces used in Android when working with
+        // the main audiovisual materials - images, videos and music.
+        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // packageManager knows all about the components installed on an Android device, including all its activities
+        PackageManager packageManager = getActivity().getPackageManager();
+        boolean canTakePhoto = mPhotoFile != null &&
+                captureImage.resolveActivity(packageManager) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
+
+        if(canTakePhoto){
+            Uri uri = Uri.fromFile(mPhotoFile);
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        }
+
+        mPhotoButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
 
@@ -191,8 +225,7 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setText(mCrime.getSuspect());
         }
 
-        // packageManager knows all about the components installed on an Android device, including all its activities
-        PackageManager packageManager = getActivity().getPackageManager();
+
         // calling resolveActivity (Intent, int), you order to find the activity corresponding to the transferred intent.
         // The MATCH_DEFAULT_ONLY flag limits search to activities with the CATEGORY_ DEFAULT flag
         // If the search is successful, a ResolveInfo instance is returned,
