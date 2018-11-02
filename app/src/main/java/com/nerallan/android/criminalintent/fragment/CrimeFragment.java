@@ -351,6 +351,8 @@ public class CrimeFragment extends Fragment {
         Intent callSuspect = new Intent(Intent.ACTION_DIAL);
         callSuspect.setData(Uri.parse("tel:" + pPhoneNumber));
         PackageManager packageManager = getActivity().getPackageManager();
+        // PackageManager knows all about the components installed on an Android device, including all its activities.
+        // By calling resolveActivity (Intent, int), you are ordered to find an activity that matches the transmitted intent.
         if (callSuspect.resolveActivity(packageManager) != null){
             startActivityForResult(callSuspect, REQUEST_CONTACT);
         }
