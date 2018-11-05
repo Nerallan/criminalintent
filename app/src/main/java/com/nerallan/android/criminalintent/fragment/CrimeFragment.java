@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
@@ -33,6 +34,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.nerallan.android.criminalintent.PictureUtils;
 import com.nerallan.android.criminalintent.R;
 import com.nerallan.android.criminalintent.model.Crime;
 import com.nerallan.android.criminalintent.model.CrimeLab;
@@ -127,6 +129,8 @@ public class CrimeFragment extends Fragment {
         mPhotoButton.setEnabled(canTakePhoto);
 
         if(canTakePhoto){
+            // To get the output image in high resolution, you must tell where to store the image in the file system.
+            // This task is solved by passing the URI for the place where the file should be stored in the MediaStore. EXTRA_OUTPUT.
             Uri uri = Uri.fromFile(mPhotoFile);
             captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         }
@@ -233,7 +237,7 @@ public class CrimeFragment extends Fragment {
         if(packageManager.resolveActivity(pickContact, packageManager.MATCH_DEFAULT_ONLY) == null){
             mSuspectButton.setEnabled(false);
         }
-
+        updatePhotoView();
         return v;
     }
 
@@ -318,6 +322,8 @@ public class CrimeFragment extends Fragment {
             } finally {
                 cursor.close();
             }
+        } else if (requestCode == REQUEST_PHOTO){
+            updatePhotoView();
         }
     }
 
@@ -412,6 +418,16 @@ public class CrimeFragment extends Fragment {
         return report;
     }
 
+
+    // to upload a Bitmap object to ImageView
+    private void updatePhotoView(){
+        if(mPhotoFile == null || !mPhotoFile.exists()){
+            mPhotoView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
+    }
 
 
     // This method creates an instance of the fragment, packages it, and sets its arguments to the fragment
