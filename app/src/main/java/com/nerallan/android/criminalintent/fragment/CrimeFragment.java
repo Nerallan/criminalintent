@@ -60,6 +60,7 @@ public class CrimeFragment extends Fragment {
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
+    private static final String DIALOG_PHOTO = "DialogPhoto";
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
     private static final int REQUEST_CONTACT = 2;
@@ -118,6 +119,15 @@ public class CrimeFragment extends Fragment {
 
         mPhotoButton = (ImageButton) v.findViewById(R.id.crime_camera);
         mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
+        mPhotoView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mPhotoFile == null || !mPhotoFile.exists()) return;
+                FragmentManager manager = getFragmentManager();
+                CrimePhotoDialogFragment dialogFragment = CrimePhotoDialogFragment.newInstance(mPhotoFile);
+                dialogFragment.show(manager, DIALOG_PHOTO);
+            }
+        });
 
         // MediaStore class defines the open interfaces used in Android when working with
         // the main audiovisual materials - images, videos and music.
