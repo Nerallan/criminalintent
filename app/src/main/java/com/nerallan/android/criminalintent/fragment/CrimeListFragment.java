@@ -1,6 +1,8 @@
 package com.nerallan.android.criminalintent.fragment;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,6 +28,8 @@ import com.nerallan.android.criminalintent.model.CrimeLab;
 import java.util.List;
 import java.util.UUID;
 
+import javax.security.auth.callback.Callback;
+
 /**
  * Created by Nerallan on 10/8/2018.
  */
@@ -44,6 +48,15 @@ public class CrimeListFragment extends Fragment{
     private Button mAddCrimeButton;
     private int mAdapterPosition;
     private boolean mSubtitleVisible;
+    private Callbacks mCallbacks;
+
+    // To delegate functionality to activity-host, a fragment typically defines a callback interface called Callbacks.
+    // This interface defines the work that must be done for a fragment by its “boss” - the activity-host.
+    // Any activity that acts as a fragment host must implement this interface.
+    // With a callback interface, a fragment can invoke host activity methods without having any information about it.
+    public interface Callbacks {
+        void onCrimeSelected(Crime pCrime);
+    }
 
 
     @Override
@@ -71,6 +84,20 @@ public class CrimeListFragment extends Fragment{
         }
         updateUI();
         return view;
+    }
+
+    // this method is called when a fragment is attached to an activity
+    // CrimeListFragment performs an unchecked conversion of its activity to the CrimeListFragment.Callbacks.
+    // This means that the host activity must implement CrimeListFragment.Callbacks
+    @Override
+    public void onAttach(Context pContext) {
+        super.onAttach(pContext);
+        Activity activity = null;
+        // Activity is a context so if you can simply check the context is an Activity and cast it if necessary.
+        if (pContext instanceof Activity){
+            activity = (Activity) pContext;
+        }
+        mCallbacks = (Callbacks) pContext;
     }
 
 
@@ -116,9 +143,11 @@ public class CrimeListFragment extends Fragment{
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
-                // launch CrimePagerActivity from intent
-                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
-                startActivity(intent);
+                // The contents of the list immediately reload after adding a new crime.
+                // This is necessary because on the tablets when adding a new crime the list remains
+                // visible on the screen (before it was closed by the detail screen)
+                updateUI();
+                mCallbacks.onCrimeSelected(crime);
                 // inform that further processing is not needed
                 return true;
             case R.id.menu_item_show_subtitle:
@@ -140,7 +169,7 @@ public class CrimeListFragment extends Fragment{
 
     // configure the user interface CrimeListFragment
     // binding adapter and RecyclerView
-    private void updateUI() {
+    public void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
         // if object CrimeAdapter not created yet
@@ -160,6 +189,15 @@ public class CrimeListFragment extends Fragment{
         // when creating a new crime and then returning to CrimeListActivity with the Back button,
         // update the contents of the subtitle to match the new number of crimes.
         updateSubtitle();
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // A variable is assigned null, because in the future you will not be able to access
+        // activity or expect that activity will continue to exist.
+        mCallbacks = null;
     }
 
 
@@ -222,9 +260,7 @@ public class CrimeListFragment extends Fragment{
 
         @Override
         public void onClick(View v) {
-            mAdapterPosition = getAdapterPosition();
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
-            startActivity(intent);
+            mCallbacks.onCrimeSelected(mCrime);
         }
     }
 

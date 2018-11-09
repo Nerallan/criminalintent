@@ -3,6 +3,7 @@ package com.nerallan.android.criminalintent.fragment;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -21,6 +22,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -34,6 +36,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.nerallan.android.criminalintent.BuildConfig;
 import com.nerallan.android.criminalintent.PictureUtils;
 import com.nerallan.android.criminalintent.R;
 import com.nerallan.android.criminalintent.model.Crime;
@@ -78,6 +81,26 @@ public class CrimeFragment extends Fragment {
     private ImageView mPhotoView;
     private Crime mCrime;
     private File mPhotoFile;
+    private Callbacks mCallbacks;
+
+    // Required interface for host activity
+    // this interface should be implemented in all activities that act as host for the CrimeFragment
+    public interface Callbacks {
+        void onCrimeUpdated(Crime pCrime);
+    }
+
+
+    @Override
+    public void onAttach(Context pContext) {
+        super.onAttach(pContext);
+        Activity activity = null;
+        // Activity is a context so if you can simply check the context is an Activity and cast it if necessary.
+        if (pContext instanceof Activity){
+            activity = (Activity) pContext;
+        }
+        mCallbacks = (Callbacks) pContext;
+    }
+
 
     // customize the fragment instance
     @Override
@@ -109,6 +132,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 mCrime.setTitle(charSequence.toString());
+                updateCrime();
             }
 
             @Override
@@ -141,7 +165,8 @@ public class CrimeFragment extends Fragment {
         if(canTakePhoto){
             // To get the output image in high resolution, you must tell where to store the image in the file system.
             // This task is solved by passing the URI for the place where the file should be stored in the MediaStore. EXTRA_OUTPUT.
-            Uri uri = Uri.fromFile(mPhotoFile);
+            //Uri uri = Uri.fromFile(mPhotoFile);
+            Uri uri = FileProvider.getUriForFile(getContext(), BuildConfig.APPLICATION_ID + ".provider", mPhotoFile);
             captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         }
 
@@ -212,6 +237,7 @@ public class CrimeFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 // set flag of crime solution
                 mCrime.setSolved(isChecked);
+                updateCrime();
             }
         });
 
@@ -258,6 +284,7 @@ public class CrimeFragment extends Fragment {
         CrimeLab.get(getActivity()).updateCrime(mCrime);
     }
 
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK){
@@ -267,10 +294,12 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
             updateDate();
+            updateCrime();
         } else if (requestCode == REQUEST_TIME){
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             mCrime.setDate(date);
             updateTime();
+            updateCrime();
         } else if (requestCode == REQUEST_CONTACT && data != null){
             String contactLookupKey;
             Uri contactUri = data.getData();
@@ -301,6 +330,7 @@ public class CrimeFragment extends Fragment {
                 String suspect = cursor.getString(nameColumn);
 
                 mCrime.setSuspect(suspect);
+                updateCrime();
                 mSuspectButton.setText(suspect);
             } finally {
                 cursor.close();
@@ -333,8 +363,16 @@ public class CrimeFragment extends Fragment {
                 cursor.close();
             }
         } else if (requestCode == REQUEST_PHOTO){
+            updateCrime();
             updatePhotoView();
         }
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
 
@@ -357,6 +395,13 @@ public class CrimeFragment extends Fragment {
         }
     }
 
+    // 1. save mCrime into CrimeLab
+    // 2. call mCallbacks.onCrimeUpdated (Crime)
+    private void updateCrime(){
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+        mCallbacks.onCrimeUpdated(mCrime);
+    }
+
     // check user permissions to open contacts
     private void openContactBook(){
         try{
@@ -370,8 +415,7 @@ public class CrimeFragment extends Fragment {
             final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
             startActivityForResult(pickContact, REQUEST_CONTACT);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex){
             ex.printStackTrace();
         }
     }
@@ -388,8 +432,7 @@ public class CrimeFragment extends Fragment {
             }
             dialPhoneNumber(mCrime.getSuspectNumber());
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex){
             ex.printStackTrace();
         }
     }
@@ -471,5 +514,4 @@ public class CrimeFragment extends Fragment {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         return simpleDateFormat.format(pDate);
     }
-
 }

@@ -25,7 +25,7 @@ import java.util.UUID;
  */
 
 // class AppCompatActivity is a subclass of FragmentActivity
-public class CrimePagerActivity extends AppCompatActivity {
+public class CrimePagerActivity extends AppCompatActivity implements CrimeFragment.Callbacks{
 
     private static final String EXTRA_CRIME_ID = "com.nerallan.android.criminalintent.crime_id";
 
@@ -43,7 +43,7 @@ public class CrimePagerActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.activity_crime_pager_view_pager);
         mCrimes = CrimeLab.get(this).getCrimes();
         FragmentManager fragmentManager = getSupportFragmentManager();
-        //  adapter FragmentStatePagerAdapter manages the interaction with ViewPager
+        // adapter FragmentStatePagerAdapter manages the interaction with ViewPager
         // In order for the adapter to do its work with the fragments returned in getItem (int),
         // it must be able to add them to the activity.
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
@@ -74,5 +74,11 @@ public class CrimePagerActivity extends AppCompatActivity {
         Intent intent = new Intent(packageContext, CrimePagerActivity.class);
         intent.putExtra(EXTRA_CRIME_ID, crimeId);
         return intent;
+    }
+
+
+    @Override
+    public void onCrimeUpdated(Crime pCrime) {
+
     }
 }
